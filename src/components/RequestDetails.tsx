@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Share } from 'react-native';
 import NetworkRequestInfo from '../NetworkRequestInfo';
-import { useThemedStyles, Theme, ThemeName } from '../theme';
+import { useThemedStyles, Theme } from '../theme';
 import { backHandlerSet } from '../backHandler';
 import ResultItem from './ResultItem';
 import Header from './Header';
 import Button from './Button';
 import JSONTree from 'react-native-json-tree';
-import { DeepPartial } from 'src/types';
+import EnlargedContent from './EnlargedContent';
 
 interface Props {
   request: NetworkRequestInfo;
   onClose(): void;
-  theme?: ThemeName | DeepPartial<Theme>;
 }
 
-const isJson = (item: string) => {
+export const isJson = (item: string) => {
   try {
     JSON.parse(item);
   } catch (error) {
@@ -52,8 +51,7 @@ const Headers = ({
 
 const LargeText: React.FC<{
   children: string;
-  theme?: ThemeName | DeepPartial<Theme>;
-}> = ({ children, theme }) => {
+}> = ({ children }) => {
   const styles = useThemedStyles(themedStyles);
 
   // if (Platform.OS === 'ios') {
@@ -80,23 +78,16 @@ const LargeText: React.FC<{
       <ScrollView nestedScrollEnabled>
         <View>
           {/* <Text style={styles.content}>{children}</Text> */}
-          <JSONTree
-            data={jsonObject}
-            theme={'isotope'}
-            invertTheme={theme === 'light' ? true : false}
-          />
+          <JSONTree data={jsonObject} theme={'isotope'} />
         </View>
       </ScrollView>
     </View>
   );
 };
 
-const RequestDetails: React.FC<Props> = ({
-  request,
-  onClose,
-  theme = 'light',
-}) => {
+const RequestDetails: React.FC<Props> = ({ request, onClose }) => {
   const [responseBody, setResponseBody] = useState('Loading...');
+  const [enlargedContent, setEnlargedContent] = useState('');
   const styles = useThemedStyles(themedStyles);
 
   useEffect(() => {
@@ -125,16 +116,47 @@ const RequestDetails: React.FC<Props> = ({
     return JSON.stringify(processedRequest, null, 2);
   };
 
+  const onPressEnlarge = (content: string) => {
+    setEnlargedContent(content);
+  };
+
+  const onPressCloseInEnlargeComp = () => {
+    setEnlargedContent('');
+  };
+
+  if (enlargedContent) {
+    return (
+      <View style={{ flex: 1 }}>
+        <EnlargedContent
+          content={enlargedContent}
+          onPressClose={onPressCloseInEnlargeComp}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ResultItem request={request} style={styles.info} />
       <ScrollView style={styles.scrollView} nestedScrollEnabled>
         <Headers title="Request Headers" headers={request.requestHeaders} />
-        <Header shareContent={requestBody}>Request Body</Header>
+        <Header
+          shareContent={requestBody}
+          showEnlargeButton={true}
+          onPressEnlarge={() => onPressEnlarge(requestBody)}
+        >
+          Request Body
+        </Header>
         <LargeText>{requestBody}</LargeText>
         <Headers title="Response Headers" headers={request.responseHeaders} />
-        <Header shareContent={responseBody}>Response Body</Header>
-        <LargeText theme={theme}>{responseBody}</LargeText>
+        <Header
+          shareContent={responseBody}
+          showEnlargeButton={true}
+          onPressEnlarge={() => onPressEnlarge(responseBody)}
+        >
+          Response Body
+        </Header>
+        <LargeText>{responseBody}</LargeText>
         <Header>More</Header>
         <Button
           onPress={() => Share.share({ message: getFullRequest() })}

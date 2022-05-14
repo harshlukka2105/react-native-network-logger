@@ -91,7 +91,6 @@ const NetworkLogger: React.FC<Props> = ({ theme = 'light', sort = 'desc' }) => {
             <RequestDetails
               onClose={() => setShowDetails(false)}
               request={request}
-              theme={theme}
             />
           </View>
         )}
