@@ -15,7 +15,7 @@ const EnlargedContent: React.FC<Props> = ({ content, onPressClose }) => {
   return (
     <ScrollView style={{ flex: 1 }}>
       <View style={{ alignItems: 'flex-end', margin: 16 }}>
-        <TouchableOpacity onPress={onPressClose}>
+        <TouchableOpacity onPress={() => onPressClose()}>
           <Text style={{ fontSize: 20, color: 'dodgerblue' }}>{'Close'}</Text>
         </TouchableOpacity>
       </View>
